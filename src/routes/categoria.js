@@ -1,12 +1,11 @@
 const express = require('express');
-const {qy} = require('../db/conexion');
+const conexion = require('../db/conexion');
 const router = express.Router();
-
 
 router.get('/categoria', async (req,res) => {
     try {
         const query = 'SELECT * FROM categoria';
-        const respuesta = await qy(query);
+        const respuesta = await conexion.query(query);
         res.status(200).send({"respuesta" : respuesta});
     } catch (error) {
         res.status(413).send({"error": error.message});
@@ -17,7 +16,7 @@ router.get('/categoria/:id', async (req,res) => {
     const {id} = req.params;
   try {
       const query = 'SELECT * FROM categoria WHERE id = ?';
-      const respuesta = await qy(query, id);
+      const respuesta = await conexion.query(query, id);
 
       res.status(200).send({"respuesta" : respuesta});
   } catch (error) {
@@ -33,8 +32,8 @@ router.post('/categoria', async (req,res) => {
         }
 
         const query = 'INSERT INTO categoria (nombre) VALUE (?)';
-        const respuesta = await qy(query, [nombre]);
-        res.status(200).send({"respuesta" : respuesta.inserId});
+        const respuesta = await conexion.query(query, [nombre]);
+        res.status(200).send({"respuesta" : respuesta.insertId});
     } catch (error) {
         res.status(413).send({"Error" : error.message});
     }
@@ -45,7 +44,7 @@ router.delete('/categoria/:id', async (req,res) => {
     try {
         let query = 'SELECT * FROM libro WHERE categoria_id = ?';
 
-        let respuesta = await qy(query, [id]);
+        let respuesta = await conexion.query(query, [id]);
 
         if (respuesta.length > 0) {
             throw new Error("Esta categoria tiene libros asociados, no se puede borrar");
@@ -53,7 +52,7 @@ router.delete('/categoria/:id', async (req,res) => {
 
         query = 'DELETE FROM categoria WHERE id = ?';
 
-        respuesta = await qy(query, [id]);
+        respuesta = await conexion.query(query, [id]);
 
         res.send({'respuesta': respuesta.affectedRows}); //add se borro correctamente
     } catch (error) {
