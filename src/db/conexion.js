@@ -16,6 +16,7 @@ conexion.connect((error) => {
     console.log('Conexion exitosa');
 });
 
-const qy =util.promisify(conexion.query).bind(conexion);
+// const qy = util.promisify(conexion.query).bind(conexion);
+conexion.query = util.promisify(conexion.query).bind(conexion);
 
 module.exports = conexion;
