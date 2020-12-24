@@ -17,7 +17,7 @@ CREATE TABLE libro(
     nombre VARCHAR(100) NOT NULL,
     descripcion VARCHAR(255),
     categoria_id INT,
-    persona_id INT,
+    persona_id INT, --null por defecto
     CONSTRAINT fk_persona FOREIGN KEY (persona_id) REFERENCES persona(id),
     CONSTRAINT fk_categoria FOREIGN KEY (categoria_id) REFERENCES categoria(id)
 );
