@@ -8,7 +8,6 @@ const conexion = mysql.createConnection({
     database: 'biblioteca_grupog'
 });
 
-
 conexion.connect((error) => {
     if(error){
         throw error;
@@ -17,6 +16,6 @@ conexion.connect((error) => {
 });
 
 // const qy = util.promisify(conexion.query).bind(conexion);
-conexion.query = util.promisify(conexion.query).bind(conexion);
+conexion.query = util.promisify(conexion.query).bind(conexion); 
 
 module.exports = conexion;

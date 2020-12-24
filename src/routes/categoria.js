@@ -27,7 +27,7 @@ router.get('/categoria/:id', async (req,res) => {
 router.post('/categoria', async (req,res) => {
      const {nombre}=req.body;
     try {
-        if(!nombre) {
+        if(!nombre) { 
             throw new Error('Ingrese un nombre de categoría');
         }
 
