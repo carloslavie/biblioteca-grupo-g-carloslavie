@@ -42,5 +42,41 @@ router.post("/libro", async (req, res)=>{
             res.status(413).send({"Error" : e.message});
         }
         });
-        module.exports = router;
+        
         //FALTARIA HACER UNA VALIDACION PARA QUE INFORME SI HAY UN GENERO O UNA PERSONA QUE NO EXISTEN
+
+
+ //PUT '/libro/:id' y {id: numero, nombre:string, descripcion:string, categoria_id:numero, persona_id:numero/null} devuelve status 200 y {id: numero, nombre:string, descripcion:string, categoria_id:numero, persona_id:numero/null} modificado o bien status 413, {mensaje: <descripcion del error>} "error inesperado",  "solo se puede modificar la descripcion del libro
+
+router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
+   
+    try{
+         if(!req.body.nombre || !req.body.descripcion || !req.body.categoria_id){
+              throw new Error("No completaste los campos");
+         }
+ 
+         let query = "SELECT * FROM libro WHERE nombre = ? AND id <> ?";
+         let respuesta = await conexion.query(query, [req.body.nombre, req.params.id]);
+ 
+        
+         if(respuesta.length >0){
+             throw new Error("El libro que queres ingresar ya existe");
+         }
+ 
+         query = "UPDATE libro SET nombre = ?, descripcion = ?, categoria_id = ?, persona_id = ? WHERE id = ?";
+         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.descripcion, req.body.categoria_id, req.body.persona_id, req.params.id]);
+ 
+         query = "SELECT * FROM libro WHERE id = ?";
+         respuesta = await conexion.query(query, [req.params.id]);
+         res.status(200).send({"Respuesta" : respuesta});
+        
+        }
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({"Error" : e.message});
+        }
+ 
+ 
+ });
+
+ module.exports = router;
