@@ -55,12 +55,12 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
               throw new Error("No completaste los campos");
          }
  
-         let query = "SELECT * FROM libro WHERE nombre = ? AND id <> ?";
-         let respuesta = await conexion.query(query, [req.body.nombre, req.params.id]);
+         let query = "SELECT * FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ?";
+         let respuesta = await conexion.query(query, [req.body.nombre, req.body.categoria_id, req.params.id]);
  
         
-         if(respuesta.length >0){
-             throw new Error("El libro que queres ingresar ya existe");
+         if(respuesta.length == 0){
+             throw new Error("El libro no existe");
          }
  
          query = "UPDATE libro SET nombre = ?, descripcion = ?, categoria_id = ?, persona_id = ? WHERE id = ?";
