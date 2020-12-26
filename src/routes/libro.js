@@ -60,7 +60,7 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
  
         
          if(respuesta.length == 0){
-             throw new Error("El libro no existe");
+             throw new Error("Solo se puede modificar la descripcion");
          }
  
          query = "UPDATE libro SET nombre = ?, descripcion = ?, categoria_id = ?, persona_id = ? WHERE id = ?";
@@ -68,7 +68,115 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
  
          query = "SELECT * FROM libro WHERE id = ?";
          respuesta = await conexion.query(query, [req.params.id]);
-         res.status(200).send({"Respuesta" : respuesta});
+         res.status(200).send({"MODIFICADO" : respuesta});
+        
+        }
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({"Error" : e.message});
+        }
+ 
+ 
+ });
+
+ //PUT '/libro/prestar/:id' y {id:numero, persona_id:numero} devuelve 200 y {mensaje: "se presto correctamente"} o bien status 413, {mensaje: <descripcion del error>} "error inesperado", "el libro ya se encuentra prestado, no se puede prestar hasta que no se devuelva", "no se encontro el libro", "no se encontro la persona a la que se quiere prestar el libro"
+
+ router.put("/libro/prestar/:id" , async (req, res)=>{ //Para modificar el campo persona_id para prestar libro
+   
+    try{
+         if(!req.body.nombre || !req.body.descripcion || !req.body.categoria_id||!req.body.persona_id){
+              throw new Error("No completaste los campos");
+         }
+ 
+         let query = "SELECT * FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ?";
+         let respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
+         
+         
+        
+         if(respuesta.length == 0){
+             throw new Error("No se encontro el libro");
+         }
+         
+         query = "SELECT * FROM persona WHERE id = ? ";
+         respuesta = await conexion.query(query, [req.body.persona_id]);
+ 
+        
+         if(respuesta.length == 0){
+             throw new Error("No se encontro la persona a la que se quiere prestar el libro");
+         }
+
+
+         query = "SELECT persona_id FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ? ";
+         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
+ 
+        console.log(respuesta.persona_id); //PROBLEMA PARA RECUPERAR SOLO EL VALUE DE PERSONA_ID
+        
+        console.log(respuesta);
+         if(respuesta.length > 0){
+             throw new Error("El libro se encuentra prestado");
+         }
+
+
+         query = "UPDATE libro SET persona_id = ? WHERE id = ?";
+         respuesta = await conexion.query(query, [req.body.persona_id, req.params.id]);
+ 
+         query = "SELECT * FROM libro WHERE id = ?";
+         respuesta = await conexion.query(query, [req.params.id]);
+         res.status(200).send({"El libro fue prestado correctamente" : respuesta});
+        
+        }
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({"Error" : e.message});
+        }
+ 
+ 
+ });
+
+ //PUT '/libro/devolver/:id' y {} devuelve 200 y {mensaje: "se realizo la devolucion correctamente"} o bien status 413, {mensaje: <descripcion del error>} "error inesperado", "ese libro no estaba prestado!", "ese libro no existe"
+
+
+
+ router.put("/libro/devolver/:id" , async (req, res)=>{ //Para modificar el campo persona_id a vacio (INCOMPLETO)
+   
+    try{
+         if(!req.body.nombre || !req.body.descripcion || !req.body.categoria_id||!req.body.persona_id){
+              throw new Error("No completaste los campos");
+         }
+ 
+         let query = "SELECT * FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ?";
+         let respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
+         
+         
+        
+         if(respuesta.length == 0){
+             throw new Error("No se encontro el libro");
+         }
+         
+         query = "SELECT * FROM persona WHERE id = ? ";
+         respuesta = await conexion.query(query, [req.body.persona_id]);
+ 
+        
+         if(respuesta.length == 0){
+             throw new Error("No se encontro la persona a la que se quiere prestar el libro");
+         }
+
+
+         query = "SELECT persona_id FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ? ";
+         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
+ 
+        
+         if(respuesta.length > 0){
+             throw new Error("El libro se encuentra prestado");
+         }
+
+
+         query = "UPDATE libro SET persona_id = ? WHERE id = ?";
+         respuesta = await conexion.query(query, [req.body.persona_id, req.params.id]);
+ 
+         query = "SELECT * FROM libro WHERE id = ?";
+         respuesta = await conexion.query(query, [req.params.id]);
+         res.status(200).send({"El libro fue prestado correctamente" : respuesta});
         
         }
         catch(e){
