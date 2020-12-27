@@ -84,7 +84,7 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
  router.put("/libro/prestar/:id" , async (req, res)=>{ //Para modificar el campo persona_id para prestar libro
    
     try{
-         if(!req.body.nombre || !req.body.descripcion || !req.body.categoria_id||!req.body.persona_id){
+         if(!req.body.nombre || !req.body.categoria_id||!req.body.persona_id){
               throw new Error("No completaste los campos");
          }
  
@@ -106,13 +106,13 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
          }
 
 
-         query = "SELECT persona_id FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ? ";
-         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
+         query = "SELECT persona_id FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ? AND persona_id IS NULL ";
+         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id, req.body.persona_id]);
  
-        console.log(respuesta.persona_id); //PROBLEMA PARA RECUPERAR SOLO EL VALUE DE PERSONA_ID
+         
+        console.log(respuesta.persona_id);
         
-        console.log(respuesta);
-         if(respuesta.length > 0){
+         if(respuesta.length == 0 ){
              throw new Error("El libro se encuentra prestado");
          }
 
@@ -137,54 +137,37 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
 
 
 
- router.put("/libro/devolver/:id" , async (req, res)=>{ //Para modificar el campo persona_id a vacio (INCOMPLETO)
+ router.put("/libro/devolver/:id" , async (req, res)=>{ //Para modificar el campo persona_id a null para devolver libro)
    
     try{
-         if(!req.body.nombre || !req.body.descripcion || !req.body.categoria_id||!req.body.persona_id){
-              throw new Error("No completaste los campos");
-         }
- 
-         let query = "SELECT * FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ?";
-         let respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
-         
-         
-        
-         if(respuesta.length == 0){
-             throw new Error("No se encontro el libro");
-         }
-         
-         query = "SELECT * FROM persona WHERE id = ? ";
-         respuesta = await conexion.query(query, [req.body.persona_id]);
- 
-        
-         if(respuesta.length == 0){
-             throw new Error("No se encontro la persona a la que se quiere prestar el libro");
-         }
-
-
-         query = "SELECT persona_id FROM libro WHERE nombre = ? AND categoria_id = ? AND id = ? ";
-         respuesta = await conexion.query(query, [req.body.nombre.toUpperCase(), req.body.categoria_id, req.params.id]);
- 
-        
-         if(respuesta.length > 0){
-             throw new Error("El libro se encuentra prestado");
-         }
-
-
-         query = "UPDATE libro SET persona_id = ? WHERE id = ?";
-         respuesta = await conexion.query(query, [req.body.persona_id, req.params.id]);
- 
-         query = "SELECT * FROM libro WHERE id = ?";
-         respuesta = await conexion.query(query, [req.params.id]);
-         res.status(200).send({"El libro fue prestado correctamente" : respuesta});
-        
+        if(!req.params.id){
+             throw new Error("No completaste el id del libro");
         }
-        catch(e){
-            console.error(e.message);
-            res.status(413).send({"Error" : e.message});
+
+        let query = "SELECT persona_id FROM libro WHERE id = ? AND persona_id IS NOT NULL";
+        let respuesta = await conexion.query(query, [req.params.id]);
+               
+       
+        if(respuesta.length == 0){
+            throw new Error("Ese libro no esta prestado");
         }
- 
- 
- });
+        
+        
+        query = "UPDATE libro SET persona_id = NULL WHERE id = ?";
+        respuesta = await conexion.query(query, [req.params.id]);
+
+        query = "SELECT * FROM libro WHERE id = ?";
+        respuesta = await conexion.query(query, [req.params.id]);
+        res.status(200).send({"El libro fue devuelto correctamente" : respuesta});
+       
+       }
+       catch(e){
+           console.error(e.message);
+           res.status(413).send({"Error" : e.message});
+       }
+
+
+});
+
 
  module.exports = router;
