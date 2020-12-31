@@ -141,7 +141,7 @@ router.put("/libro/:id" , async (req, res)=>{ //Para modificar un libro
    
     try{
         if(!req.params.id){
-             throw new Error("No completaste el id del libro");
+             throw new Error("No completaste el id del libro"); //SI NO LO COMPLETAS NO ME TIRA ESTE ERROR (REVISAR)
         }
 
         let query = "SELECT persona_id FROM libro WHERE id = ? AND persona_id IS NOT NULL";
